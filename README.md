@@ -1,98 +1,228 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# E-commerce Dashboard API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API Backend para um dashboard analítico de e-commerce desenvolvido com **NestJS**, **PostgreSQL** e **Prisma**, utilizando o Brazilian E-Commerce Public Dataset by Olist como fonte de dados.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+O projeto tem como objetivo construir uma API REST capaz de disponibilizar métricas de vendas e comportamento do e-commerce para consumo por um dashboard.
 
-## Description
+## Sobre o projeto
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+O projeto combina desenvolvimento backend e conceitos de engenharia de dados.
 
-## Project setup
+O foco principal está na construção de uma API organizada e escalável, enquanto os dados do dataset são processados, validados e carregados em um banco PostgreSQL para serem utilizados pelas consultas analíticas.
 
-```bash
-$ npm install
+Entre as métricas disponibilizadas estão:
+
+* GMV
+* quantidade de pedidos
+* ticket médio
+* vendas por categoria
+* pedidos por categoria
+* vendas por status
+* pedidos por status
+* métricas por estado
+* métricas mensais
+* vendas por estado do vendedor
+* quantidade de itens por categoria
+
+## Tecnologias
+
+### Backend
+
+* Node.js
+* TypeScript
+* NestJS
+* Prisma
+* PostgreSQL
+* REST API
+
+### Data Engineering
+
+* Python
+* Pandas
+* PostgreSQL
+* Scripts de validação e carga de dados
+* Brazilian E-Commerce Public Dataset by Olist
+
+### Ferramentas
+
+* Git
+* GitHub
+* ESLint
+* Prettier
+* Jest
+
+## Arquitetura
+
+A aplicação é organizada em módulos seguindo a estrutura do NestJS.
+
+```text
+src/
+├── dashboard/
+│   ├── interfaces/
+│   │   └── dashboard.interface.ts
+│   ├── dashboard.controller.ts
+│   ├── dashboard.service.ts
+│   └── dashboard.module.ts
+│
+├── database/
+│   ├── database.module.ts
+│   └── prisma.service.ts
+│
+└── ...
 ```
 
-## Compile and run the project
+O `DashboardController` é responsável pelos endpoints da API, enquanto o `DashboardService` concentra as consultas e regras relacionadas às métricas analíticas.
 
-```bash
-# development
-$ npm run start
+O acesso ao PostgreSQL é realizado através do Prisma.
 
-# watch mode
-$ npm run start:dev
+## Dataset
 
-# production mode
-$ npm run start:prod
+O projeto utiliza o **Brazilian E-Commerce Public Dataset by Olist**, que contém informações sobre pedidos, produtos, vendedores, clientes, pagamentos e avaliações de um marketplace brasileiro.
+
+O dataset original não é armazenado neste repositório.
+
+Os scripts utilizados para inspeção, validação, transformação e carga dos dados estão disponíveis em:
+
+```text
+data/scripts/
 ```
 
-## Run tests
+Os dados brutos devem ser obtidos separadamente e colocados em:
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```text
+data/raw/
 ```
 
-## Deployment
+## Principais endpoints
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+A API utiliza endpoints em português para representar as funcionalidades disponibilizadas pelo dashboard.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Resumo
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```http
+GET /dashboard/resumo
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Retorna as principais métricas gerais do e-commerce:
 
-## Resources
+* GMV
+* pedidos
+* ticket médio
 
-Check out a few resources that may come in handy when working with NestJS:
+### Métricas mensais
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```http
+GET /dashboard/gmv/mensal
+GET /dashboard/pedidos/mensal
+GET /dashboard/ticket-medio/mensal
+```
 
-## Support
+### Métricas por categoria
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```http
+GET /dashboard/gmv/categoria
+GET /dashboard/pedidos/categoria
+GET /dashboard/ticket-medio/categoria
+GET /dashboard/itens/categoria
+```
 
-## Stay in touch
+### Métricas por status
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```http
+GET /dashboard/gmv/status
+GET /dashboard/pedidos/status
+```
 
-## License
+### Métricas por estado
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```http
+GET /dashboard/gmv/estado
+GET /dashboard/pedidos/estado
+GET /dashboard/ticket-medio/estado
+```
+
+### Métricas relacionadas aos vendedores
+
+```http
+GET /dashboard/gmv/estado-vendedor
+```
+
+## Configuração do projeto
+
+Clone o repositório e instale as dependências:
+
+```bash
+git clone <https://github.com/EloiEdu/ecommerce-dashboard-api.git>
+cd ecommerce-dashboard-api
+npm install
+```
+
+Configure a variável de ambiente:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+```
+
+As migrations do Prisma estão disponíveis em:
+
+```text
+prisma/migrations/
+```
+
+Execute as migrations:
+
+```bash
+npx prisma migrate deploy
+```
+
+## Scripts
+
+### Desenvolvimento
+
+```bash
+npm run start:dev
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+### Produção
+
+```bash
+npm run start:prod
+```
+
+### Testes
+
+```bash
+npm run test
+npm run test:e2e
+npm run test:cov
+```
+
+## Data pipeline
+
+Os scripts Python em `data/scripts/` são responsáveis pelas etapas de preparação e carregamento dos dados.
+
+Entre as etapas implementadas estão:
+
+1. inspeção do dataset;
+2. validação da qualidade dos dados;
+3. tratamento e tradução de categorias;
+4. carregamento das entidades no PostgreSQL;
+5. validação dos dados após a carga.
+
+O pipeline foi desenvolvido para transformar os dados brutos em uma estrutura relacional adequada para as consultas utilizadas pela API.
+
+## Próximos passos
+
+* integração com o frontend do dashboard;
+* autenticação e autorização;
+* filtros dinâmicos para as métricas;
+* documentação da API;
+* melhorias de performance nas consultas analíticas;
+* deploy da aplicação.
+
