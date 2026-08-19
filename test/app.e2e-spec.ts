@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
@@ -16,11 +18,15 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('GET /dashboard/resumo', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/dashboard/resumo')
       .expect(200)
-      .expect('Hello World!');
+      .expect((response) => {
+        expect(response.body).toHaveProperty('gmv');
+        expect(response.body).toHaveProperty('orders');
+        expect(response.body).toHaveProperty('averageTicket');
+      });
   });
 
   afterEach(async () => {
