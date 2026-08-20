@@ -41,7 +41,7 @@ describe('DashboardService', () => {
       },
     ]);
 
-    const result = await service.getDashboardSummary();
+    const result = await service.getDashboardSummary({});
 
     expect(result).toEqual({
       gmv: 100000,
@@ -61,7 +61,7 @@ describe('DashboardService', () => {
       },
     ]);
 
-    const result = await service.getDashboardSummary();
+    const result = await service.getDashboardSummary({});
 
     expect(result).toEqual({
       gmv: 0,
