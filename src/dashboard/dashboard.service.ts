@@ -16,12 +16,35 @@ import {
   ItemsByCategory,
   GmvBySellerState,
 } from './interfaces/dashboard.interface';
+import { DashboardFilterDto } from './dto/dashboard-filter.dto';
+import { Prisma } from '../generated/prisma/client';
 
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getGmvByMonth(): Promise<GmvByMonth[]> {
+  private buildDashboardDateFilter(filters: DashboardFilterDto): Prisma.Sql {
+    const conditions: Prisma.Sql[] = [];
+
+    if (filters.startDate) {
+      conditions.push(
+        Prisma.sql`o."purchaseTimestamp" >= ${filters.startDate}::DATE`,
+      );
+    }
+
+    if (filters.endDate) {
+      conditions.push(
+        Prisma.sql`o."purchaseTimestamp" < ${filters.endDate}::DATE + INTERVAL '1 day'`,
+      );
+    }
+
+    return conditions.length > 0
+      ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+      : Prisma.empty;
+  }
+  async getGmvByMonth(filters: DashboardFilterDto): Promise<GmvByMonth[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<GmvByMonth[]>`
       SELECT
       DATE_TRUNC('month', o."purchaseTimestamp") AS month,
@@ -29,45 +52,63 @@ export class DashboardService {
     FROM "Order" o
     JOIN "OrderItem" oi
       ON oi."orderId" = o."orderId"
+      ${where}
     GROUP BY DATE_TRUNC('month', o."purchaseTimestamp")
     ORDER BY month;    
     `;
   }
 
-  async getOrdersByMonth(): Promise<OrdersByMonth[]> {
+  async getOrdersByMonth(
+    filters: DashboardFilterDto,
+  ): Promise<OrdersByMonth[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<OrdersByMonth[]>`
       SELECT
       DATE_TRUNC('month', o."purchaseTimestamp") AS month,
       COUNT(DISTINCT o."orderId")::INTEGER AS orders
       FROM "Order" o
+      ${where}
       GROUP BY DATE_TRUNC('month', o."purchaseTimestamp")
       ORDER BY month;
       `;
   }
 
-  async getAverageTicketByMonth(): Promise<AverageTicketByMonth[]> {
+  async getAverageTicketByMonth(
+    filters: DashboardFilterDto,
+  ): Promise<AverageTicketByMonth[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<AverageTicketByMonth[]>`
       SELECT
       DATE_TRUNC('month', o."purchaseTimestamp") AS month,
-      (
-        SUM(oi."price") / COUNT(DISTINCT o."orderId")
+      ROUND(
+        SUM(oi."price") / COUNT(DISTINCT o."orderId"),
+        2
       )::DOUBLE PRECISION AS "averageTicket"
       FROM "Order" o
       JOIN "OrderItem" oi
         ON oi."orderId" = o."orderId"
+        ${where}
       GROUP BY DATE_TRUNC('month', o."purchaseTimestamp")
       ORDER BY month;
     `;
   }
 
-  async getGmvByCategory(): Promise<GmvByCategory[]> {
+  async getGmvByCategory(
+    filters: DashboardFilterDto,
+  ): Promise<GmvByCategory[]> {
+    const where = this.buildDashboardDateFilter(filters);
     return this.prisma.$queryRaw<GmvByCategory[]>`
       SELECT
         COALESCE(p."categoryName", p."categoryNameEnglish", 'unknown') AS category,
         SUM(oi."price")::DOUBLE PRECISION AS gmv
       FROM "OrderItem" oi
+      JOIN "Order" o
+        ON o."orderId" = oi."orderId"
       JOIN "Product" p
         ON p."productId" = oi."productId"
+        ${where}
       GROUP BY COALESCE(
         p."categoryName",
         p."categoryNameEnglish",
@@ -77,7 +118,11 @@ export class DashboardService {
       `;
   }
 
-  async getOrdersByCategory(): Promise<OrdersByCategory[]> {
+  async getOrdersByCategory(
+    filters: DashboardFilterDto,
+  ): Promise<OrdersByCategory[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<OrdersByCategory[]>`
       SELECT
         COALESCE(
@@ -87,8 +132,11 @@ export class DashboardService {
         ) AS category,
         COUNT(DISTINCT oi."orderId")::INTEGER AS orders
       FROM "OrderItem" oi
+      JOIN "Order" o
+        ON o."orderId" = oi."orderId"
       JOIN "Product" p
         ON p."productId" = oi."productId"
+      ${where}
       GROUP BY COALESCE(
         p."categoryName",
         p."categoryNameEnglish",
@@ -98,7 +146,11 @@ export class DashboardService {
     `;
   }
 
-  async getAverageTicketByCategory(): Promise<AverageTicketByCategory[]> {
+  async getAverageTicketByCategory(
+    filters: DashboardFilterDto,
+  ): Promise<AverageTicketByCategory[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<AverageTicketByCategory[]>`
       SELECT
         COALESCE(
@@ -106,12 +158,17 @@ export class DashboardService {
           p."categoryNameEnglish",
           'unknown'
         ) AS category,
-        (
-          SUM(oi."price") / COUNT(DISTINCT oi."orderId")
-        )::DOUBLE PRECISION AS "averageTicket"
+        ROUND(
+         SUM(oi."price")::NUMERIC
+          / COUNT(DISTINCT oi."orderId"),
+          2
+          )::DOUBLE PRECISION AS "averageTicket"
       FROM "OrderItem" oi
+      JOIN "Order" o
+        ON o."orderId" = oi."orderId"
       JOIN "Product" p
         ON p."productId" = oi."productId"
+      ${where}
       GROUP BY COALESCE(
         p."categoryName",
         p."categoryNameEnglish",
@@ -121,84 +178,114 @@ export class DashboardService {
     `;
   }
 
-  async getOrdersByStatus(): Promise<OrdersByStatus[]> {
+  async getOrdersByStatus(
+    filters: DashboardFilterDto,
+  ): Promise<OrdersByStatus[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<OrdersByStatus[]>`
       SELECT
-        o."status",
+        o."status" AS status,
         COUNT(*)::INTEGER AS orders
       FROM "Order" o
+      ${where}
       GROUP BY o."status"
       ORDER BY orders DESC;
     `;
   }
 
-  async getGmvByStatus(): Promise<GmvByStatus[]> {
+  async getGmvByStatus(filters: DashboardFilterDto): Promise<GmvByStatus[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<GmvByStatus[]>`
       SELECT
-        o."status",
+        o."status" AS status,
         SUM(oi."price")::DOUBLE PRECISION AS gmv
       FROM "Order" o
       JOIN "OrderItem" oi
         ON oi."orderId" = o."orderId"
+      ${where}
       GROUP BY o."status"
       ORDER BY gmv DESC;
     `;
   }
 
-  async getGmvByState(): Promise<GmvByState[]> {
+  async getGmvByState(filters: DashboardFilterDto): Promise<GmvByState[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<GmvByState[]>`
       SELECT
-      c."state",
+      c."state" AS state,
       SUM(oi."price")::DOUBLE PRECISION AS gmv
       FROM "Order" o
-      JOIN "Customer" c
-        ON c."customerId" = o."customerId"
       JOIN "OrderItem" oi
         ON oi."orderId" = o."orderId"
+      JOIN "Customer" c
+        ON c."customerId" = o."customerId"
+      ${where}
       GROUP BY c."state"
       ORDER BY gmv DESC;
     `;
   }
 
-  async getOrdersByState(): Promise<OrdersByState[]> {
+  async getOrdersByState(
+    filters: DashboardFilterDto,
+  ): Promise<OrdersByState[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<OrdersByState[]>`
       SELECT
-      c."state",
+      c."state" AS state,
       COUNT(DISTINCT o."orderId")::INTEGER AS orders
       FROM "Order" o
       JOIN "Customer" c
         ON c."customerId" = o."customerId"
+      ${where}
       GROUP BY c."state"
       ORDER BY orders DESC;
     `;
   }
 
-  async getAverageTicketByState(): Promise<AverageTicketByState[]> {
+  async getAverageTicketByState(
+    filters: DashboardFilterDto,
+  ): Promise<AverageTicketByState[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<AverageTicketByState[]>`
       SELECT
-      c."state",
-      (
-        SUM(oi."price") / COUNT(DISTINCT o."orderId")
+      c."state" AS state,
+      ROUND(
+        SUM(oi."price") / COUNT(DISTINCT o."orderId"),
+        2
       )::DOUBLE PRECISION AS "averageTicket"
       FROM "Order" o
-      JOIN "Customer" c
-        ON c."customerId" = o."customerId"
       JOIN "OrderItem" oi
         ON oi."orderId" = o."orderId"
+      JOIN "Customer" c
+        ON c."customerId" = o."customerId"
+      ${where}
       GROUP BY c."state"
       ORDER BY "averageTicket" DESC;
     `;
   }
 
-  async getDashboardSummary(): Promise<DashboardSummary> {
+  async getDashboardSummary(
+    filters: DashboardFilterDto,
+  ): Promise<DashboardSummary> {
+    const where = this.buildDashboardDateFilter(filters);
     const result = await this.prisma.$queryRaw<DashboardSummary[]>`
       SELECT
       SUM(oi."price")::DOUBLE PRECISION AS gmv,
       COUNT(DISTINCT oi."orderId")::INTEGER AS orders,
-      (
-        SUM(oi."price") / COUNT(DISTINCT oi."orderId")
+      ROUND(
+        SUM(oi."price") / COUNT(DISTINCT oi."orderId"),
+        2
       )::DOUBLE PRECISION AS "averageTicket"
-      FROM "OrderItem" oi;
+      FROM "Order" o
+
+      JOIN "OrderItem" oi
+       ON oi."orderId" = o."orderId"
+      ${where}
     `;
     return (
       result[0] ?? {
@@ -209,7 +296,11 @@ export class DashboardService {
     );
   }
 
-  async getItemsByCategory(): Promise<ItemsByCategory[]> {
+  async getItemsByCategory(
+    filters: DashboardFilterDto,
+  ): Promise<ItemsByCategory[]> {
+    const where = this.buildDashboardDateFilter(filters);
+
     return this.prisma.$queryRaw<ItemsByCategory[]>`
       SELECT
       COALESCE(
@@ -219,8 +310,11 @@ export class DashboardService {
       ) AS category,
       COUNT(*)::INTEGER AS items
       FROM "OrderItem" oi
+      JOIN "Order" o
+        ON o."orderId" = oi."orderId"
       JOIN "Product" p
         ON p."productId" = oi."productId"
+      ${where}
       GROUP BY COALESCE(
         p."categoryName",
         p."categoryNameEnglish",
@@ -231,14 +325,20 @@ export class DashboardService {
       `;
   }
 
-  async getGmvBySellerState(): Promise<GmvBySellerState[]> {
+  async getGmvBySellerState(
+    filters: DashboardFilterDto,
+  ): Promise<GmvBySellerState[]> {
+    const where = this.buildDashboardDateFilter(filters);
     return this.prisma.$queryRaw<GmvBySellerState[]>`
       SELECT
-        s."state",
+        s."state" AS state,
         SUM(oi."price")::DOUBLE PRECISION AS gmv
-      FROM "OrderItem" oi
+      FROM "Order" o
+      JOIN "OrderItem" oi
+        ON oi."orderId" = o."orderId"
       JOIN "Seller" s
         ON s."sellerId" = oi."sellerId"
+      ${where}
       GROUP BY s."state"
       ORDER BY gmv DESC;
     `;
