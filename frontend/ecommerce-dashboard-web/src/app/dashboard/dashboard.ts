@@ -1,5 +1,8 @@
 import { Component, OnInit, inject,signal } from '@angular/core';
 import { DashboardService } from '../services/dashboard.service';
+import { FormsModule } from '@angular/forms';
+
+import * as charts from './dashboard-charts';
 
 import {
   DashboardSummary,
@@ -16,6 +19,7 @@ import {
   AverageTicketByState,
   ItemsByCategory,
   GmvBySellerState,
+  DashboardFilters
 } from '../interfaces/dashboard.interfaces';
 
 import {
@@ -31,13 +35,63 @@ import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [BaseChartDirective],
+  imports: [
+    BaseChartDirective,
+    FormsModule,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 
 export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
+
+  gmvChartData = charts.gmvChartData;
+  gmvChartOptions = charts.gmvChartOptions;
+
+  ordersChartData = charts.ordersChartData;
+  ordersChartOptions = charts.ordersChartOptions;
+
+  averageTicketChartData = charts.averageTicketChartData;
+  averageTicketChartOptions = charts.averageTicketChartOptions;
+
+  gmvCategoryChartData = charts.gmvCategoryChartData;
+  categoryChartOptions = charts.categoryChartOptions;
+
+  ordersStatusChartData = charts.ordersStatusChartData;
+  ordersStatusChartOptions = charts.ordersStatusChartOptions;
+
+  ordersByMonthChartOptions = charts.ordersByMonthChartOptions;
+  averageTicketByMonthChartOptions = charts.averageTicketByMonthChartOptions;
+
+  gmvStatusChartData = charts.gmvStatusChartData;
+  gmvStatusChartOptions = charts.gmvStatusChartOptions;
+
+  averageTicketStatusChartData = charts.averageTicketStatusChartData;
+  averageTicketStatusChartOptions = charts.averageTicketStatusChartOptions;
+
+  ordersCategoryChartData = charts.ordersCategoryChartData;
+  ordersCategoryChartOptions = charts.ordersCategoryChartOptions;
+
+  averageTicketCategoryChartData = charts.averageTicketCategoryChartData;
+  averageTicketCategoryChartOptions = charts.averageTicketCategoryChartOptions;
+
+  gmvStateChartData = charts.gmvStateChartData;
+  gmvStateChartOptions = charts.gmvStateChartOptions;
+
+  ordersStateChartData = charts.ordersStateChartData;
+  ordersStateChartOptions = charts.ordersStateChartOptions;
+
+  averageTicketStateChartData = charts.averageTicketStateChartData;
+  averageTicketStateChartOptions = charts.averageTicketStateChartOptions;
+
+  itemsCategoryChartData = charts.itemsCategoryChartData;
+  itemsCategoryChartOptions = charts.itemsCategoryChartOptions;
+
+  gmvSellerStateChartData = charts.gmvSellerStateChartData;
+  gmvSellerStateChartOptions = charts.gmvSellerStateChartOptions;
+
+  itemsByCategoryChartOptions = charts.itemsByCategoryChartOptions;
 
   gmvByMonth = signal<GmvByMonth[]>([]);
   gmvByCategory = signal<GmvByCategory[]>([]);
@@ -64,329 +118,39 @@ export class Dashboard implements OnInit {
     orders: 0,
     averageTicket: 0,
   });
-  gmvChartData = signal<ChartData<'line'>> ({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        label: 'GMV',
-        tension: 0.3,
-        fill:false,
-        borderWidth: 2,
-        pointRadius: 3,
-      },
-    ],
-  });
 
-  ordersChartData = signal<ChartData<'line'>>({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        label: 'Pedidos',
-        tension: 0.3,
-        fill: false,
-        borderWidth: 2,
-        pointRadius: 3,
-      },
-    ],
-  });
+  startDate = '';
+  endDate = '';
 
-  averageTicketChartData = signal<ChartData<'line'>>({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        label: 'Ticket Médio',
-        tension: 0.3,
-        fill: false,
-        borderWidth: 2,
-        pointRadius: 3,
-      },
-    ],
-  });
+  private getFilters(): DashboardFilters {
+    return {
+      startDate: this.startDate || undefined,
+      endDate: this.endDate || undefined,
 
-  ordersChartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  averageTicketChartOptions: ChartOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-  };
-
-  gmvChartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      }
     }
-  };
+  }
 
-  gmvCategoryChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'GMV',
-        data: [],
-      },
-    ],
-  });
+  ngOnInit(): void {
+    this.loadDashboard();
+  }
 
-  categoryChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
+  applyFilters(): void {
+    if (
+      this.startDate &&
+      this.endDate &&
+      this.startDate > this.endDate
+    ) {
+      return;
+    }
+    this.loadDashboard();
+  }
 
-  ordersStatusChartData = signal<ChartData<'doughnut'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Pedidos',
-        data: [],
-      },
-    ],
-  });
+  clearFilters(): void {
+    this.startDate = '';
+    this.endDate = '';
 
-  ordersByMonthChartOptions: ChartOptions<'line'> = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-    };
-
-  averageTicketByMonthChartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  itemsByCategoryChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  gmvStatusChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'GMV',
-        data: [],
-      },
-    ],
-  });
-
-  averageTicketStatusChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Ticket Médio',
-        data: [],
-      },
-    ],
-  });
-
-  gmvStatusChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  ordersStatusChartOptions: ChartOptions<'doughnut'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  averageTicketStatusChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  ordersCategoryChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Pedidos',
-        data: [],
-      },
-    ],
-  });
-
-  averageTicketCategoryChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Ticket Médio',
-        data: [],
-      },
-    ],
-  });
-
-  ordersCategoryChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  averageTicketCategoryChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  gmvStateChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'GMV',
-        data: [],
-      },
-    ],
-  });
-
-  ordersStateChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Pedidos',
-        data: [],
-      },
-    ],
-  });
-
-  averageTicketStateChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Ticket Médio',
-        data: [],
-      },
-    ],
-  });
-
-  gmvStateChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  ordersStateChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  averageTicketStateChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  itemsCategoryChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'Itens vendidos',
-        data: [],
-      },
-    ],
-  });
-
-  gmvSellerStateChartData = signal<ChartData<'bar'>>({
-    labels: [],
-    datasets: [
-      {
-        label: 'GMV',
-        data: [],
-      },
-    ],
-  });
-
-  itemsCategoryChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-  gmvSellerStateChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  };
-
-
+    this.loadDashboard();
+  }
 
   formatCurrency(value: number): string {
     return value.toLocaleString('pt-BR', {
@@ -394,8 +158,11 @@ export class Dashboard implements OnInit {
       currency: 'BRL',
   });
 }
-  ngOnInit(): void {
-    this.dashboardService.getSummary().subscribe({
+  private loadDashboard(): void {
+
+    const filters = this.getFilters();
+
+    this.dashboardService.getSummary(filters).subscribe({
       next: (data) => {
         console.log('Dashboard:', data);
         this.summary.set(data)
@@ -405,7 +172,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getGmvByMonth().subscribe({
+    this.dashboardService.getGmvByMonth(filters).subscribe({
       next: (data) => {
         console.log('GMV mensal:', data);
         this.gmvByMonth.set(data)
@@ -435,7 +202,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getGmvByCategory().subscribe({
+    this.dashboardService.getGmvByCategory(filters).subscribe({
     next: (data) => {
       console.log('GMV por categoria:', data);
       this.gmvByCategory.set(data);
@@ -455,7 +222,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getOrdersByStatus().subscribe({
+    this.dashboardService.getOrdersByStatus(filters).subscribe({
       next: (data) => {
         console.log('Pedidos por status:', data);
         this.ordersByStatus.set(data);
@@ -475,7 +242,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getOrdersByMonth().subscribe({
+    this.dashboardService.getOrdersByMonth(filters).subscribe({
       next: (data) => {
         console.log('Pedidos mensal:', data);
         this.ordersByMonth.set(data);
@@ -504,7 +271,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getAverageTicketByMonth().subscribe({
+    this.dashboardService.getAverageTicketByMonth(filters).subscribe({
       next: (data) => {
         console.log('Ticket médio mensal:', data);
         this.averageTicketByMonth.set(data);
@@ -534,7 +301,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getOrdersByCategory().subscribe({
+    this.dashboardService.getOrdersByCategory(filters).subscribe({
       next: (data) => {
         console.log('Pedidos por categoria:', data);
         this.ordersByCategory.set(data);
@@ -554,7 +321,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getAverageTicketByCategory().subscribe({
+    this.dashboardService.getAverageTicketByCategory(filters).subscribe({
       next: (data) => {
         console.log('Ticket médio por categoria:', data);
         this.averageTicketByCategory.set(data);
@@ -574,7 +341,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getGmvByStatus().subscribe({
+    this.dashboardService.getGmvByStatus(filters).subscribe({
       next: (data) => {
         console.log('GMV por status:', data);
         this.gmvByStatus.set(data);
@@ -594,7 +361,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getGmvByState().subscribe({
+    this.dashboardService.getGmvByState(filters).subscribe({
       next: (data) => {
         console.log('GMV por estado:', data);
         this.gmvByState.set(data);
@@ -613,7 +380,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getOrdersByState().subscribe({
+    this.dashboardService.getOrdersByState(filters).subscribe({
       next: (data) => {
         console.log('Pedidos por estado:', data);
         this.ordersByState.set(data);
@@ -632,7 +399,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getAverageTicketByState().subscribe({
+    this.dashboardService.getAverageTicketByState(filters).subscribe({
       next: (data) => {
         console.log('Ticket médio por estado:', data);
         this.averageTicketByState.set(data);
@@ -652,7 +419,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getItemsByCategory().subscribe({
+    this.dashboardService.getItemsByCategory(filters).subscribe({
       next: (data) => {
         console.log('Itens por categoria:', data);
         this.itemsByCategory.set(data);
@@ -673,7 +440,7 @@ export class Dashboard implements OnInit {
       },
     });
 
-    this.dashboardService.getGmvBySellerState().subscribe({
+    this.dashboardService.getGmvBySellerState(filters).subscribe({
       next: (data) => {
         console.log('GMV por estado do vendedor:', data);
         this.gmvBySellerState.set(data);

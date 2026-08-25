@@ -4,6 +4,42 @@
     <p>Visão geral das vendas</p>
   </header>
 
+  <section class="filters">
+    <p class="dataset-info">
+      Período disponível nos dados: <strong>24/09/2016 a 17/10/2018</strong>
+    </p>
+    <div class="filter-group">
+      <label for="startDate">Data inicial</label>
+      <input
+        id="startDate"
+        type="date"
+        lang="pt-BR"
+        [(ngModel)]="startDate"
+      />
+    </div>
+
+    <div class="filter-group">
+      <label for="endDate">Data final</label>
+      <input
+        id="endDate"
+        type="date"
+        lang="pt-BR"
+        [(ngModel)]="endDate"
+      />
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" (click)="applyFilters()">
+        Aplicar filtros
+      </button>
+
+      <button type="button" (click)="clearFilters()">
+        Limpar
+      </button>
+    </div>
+  </section>
+
+
   <section class="summary">
     <div class="card">
       <span>GMV</span>
