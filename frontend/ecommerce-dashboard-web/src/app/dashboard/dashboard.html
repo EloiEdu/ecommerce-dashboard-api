@@ -1,0 +1,198 @@
+<div class="dashboard">
+  <header>
+    <h1>E-commerce Dashboard</h1>
+    <p>Visão geral das vendas</p>
+  </header>
+
+  <section class="summary">
+    <div class="card">
+      <span>GMV</span>
+      <strong> {{ formatCurrency(summary().gmv) }}</strong>
+    </div>
+
+    <div class="card">
+      <span>Pedidos</span>
+      <strong>{{ summary().orders.toLocaleString('pt-BR') }}</strong>
+    </div>
+
+    <div class="card">
+      <span>Ticket Médio</span>
+      <strong> {{ formatCurrency(summary().averageTicket) }}</strong>
+    </div>
+  </section>
+
+  <section class="charts">
+
+    <div class="chart">
+      <h2>GMV por mês</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="gmvChartData()"
+          [options]="gmvChartOptions"
+          [type]="'line'">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>GMV por estado do vendedor</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="gmvSellerStateChartData()"
+          [options]="gmvSellerStateChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>Pedidos por mês</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="ordersChartData()"
+          [options]="ordersChartOptions"
+          type="line">
+        </canvas>
+      </div>
+
+    </div>
+
+    <div class="chart">
+      <h2>Ticket médio por mês</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="averageTicketChartData()"
+          [options]="averageTicketChartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>GMV por categoria</h2>
+      <div class="chart-container">
+       <canvas
+          baseChart
+          [data]="gmvCategoryChartData()"
+          [options]="categoryChartOptions"
+          type="bar"
+        ></canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>Itens vendidos por categoria</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="itemsCategoryChartData()"
+          [options]="itemsCategoryChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+
+    <div class="chart">
+      <h2>Pedidos por categoria</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="ordersCategoryChartData()"
+          [options]="ordersCategoryChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>Ticket médio por categoria</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="averageTicketCategoryChartData()"
+          [options]="averageTicketCategoryChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+    <h2>Pedidos por status</h2>
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="ordersStatusChartData()"
+          type="doughnut"
+      ></canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>GMV por status</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="gmvStatusChartData()"
+          [options]="gmvStatusChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>GMV por estado</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="gmvStateChartData()"
+          [options]="gmvStateChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>Pedidos por estado</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="ordersStateChartData()"
+          [options]="ordersStateChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="chart">
+      <h2>Ticket médio por estado</h2>
+
+      <div class="chart-container">
+        <canvas
+          baseChart
+          [data]="averageTicketStateChartData()"
+          [options]="averageTicketStateChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+
+
+    
+  </section>
+</div>
