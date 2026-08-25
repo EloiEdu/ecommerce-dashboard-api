@@ -68,3 +68,8 @@ export interface GmvBySellerState {
   state: string;
   gmv: number;
 }
+
+export interface DashboardFilters {
+  startDate?: string;
+  endDate?: string;
+}
