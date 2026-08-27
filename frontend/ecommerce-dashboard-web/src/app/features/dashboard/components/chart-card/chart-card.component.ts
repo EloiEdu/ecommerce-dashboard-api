@@ -1,30 +1,33 @@
-import { Component, input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectorRef, inject, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartData, ChartOptions, ChartType } from 'chart.js';
+import { ChartData, ChartType, ChartOptions } from 'chart.js';
 
 @Component({
   selector: 'app-chart-card',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective],
   templateUrl: './chart-card.component.html',
-  styleUrls: ['./chart-card.component.css'],
+  styleUrls: ['./chart-card.component.css']
 })
-export class ChartCardComponent {
-  /** Título do card (ex: "GMV por Categoria") */
-  title = input.required<string>();
+export class ChartCardComponent implements OnChanges {
+  @Input() title: string = '';
+  @Input() data: ChartData | null = null;
+  @Input() type: ChartType = 'bar';
 
-  /** Estrutura de dados exigida pelo Chart.js (vinda do DashboardAdapterService) */
-  data = input.required<ChartData<any>>();
+  @ViewChild(BaseChartDirective) chartDirective?: BaseChartDirective;
 
-  /** Tipo do gráfico (bar, line, doughnut, etc.). Padrão: 'bar' */
-  type = input<ChartType>('bar');
+  private cdr = inject(ChangeDetectorRef);
 
-  /** Opções do gráfico. Possui fallback para opções responsivas padrão */
-  options = input<ChartOptions>({
+  chartOptions: ChartOptions = {
     responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true },
-    },
-  });
+    maintainAspectRatio: false
+  };
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data'] && this.data) {
+      this.cdr.detectChanges();
+      this.chartDirective?.update();
+    }
+  }
 }

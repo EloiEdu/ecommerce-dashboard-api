@@ -18,9 +18,8 @@ import {
   AverageTicketByState,
   ItemsByCategory,
   GmvBySellerState,
-} from '../interfaces/dashboard.interfaces'; // Ajuste o caminho das suas interfaces se necessário
+} from '../interfaces/dashboard.interfaces';
 
-/** Interface unificada para o retorno do forkJoin */
 export interface DashboardDataPayload {
   summary: DashboardSummary;
   gmvByMonth: GmvByMonth[];
@@ -56,7 +55,6 @@ export class DashboardService {
     return params;
   }
 
-  // Mantemos os métodos individuais para uso pontual, se necessário...
   getSummary(filters: DashboardFilters): Observable<DashboardSummary> {
     return this.http.get<DashboardSummary>(`${this.apiUrl}/resumo`, {
       params: this.buildParams(filters),
@@ -141,9 +139,6 @@ export class DashboardService {
     });
   }
 
-  /**
-   * NOVO MÉTODO: Dispara todas as chamadas do Dashboard em paralelo.
-   */
   getDashboardData(filters: DashboardFilters): Observable<DashboardDataPayload> {
     const options = { params: this.buildParams(filters) };
 

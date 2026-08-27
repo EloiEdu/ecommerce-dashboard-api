@@ -1,12 +1,12 @@
+import { DashboardAdapterService } from './dashboard-adapter.service';
 import { TestBed } from '@angular/core/testing';
-import { DashboardAdapter } from './dashboard-adapter';
 
 describe('DashboardAdapter', () => {
-  let service: DashboardAdapter;
+  let service: DashboardAdapterService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DashboardAdapter);
+    service = TestBed.inject(DashboardAdapterService);
   });
 
   it('should be created', () => {

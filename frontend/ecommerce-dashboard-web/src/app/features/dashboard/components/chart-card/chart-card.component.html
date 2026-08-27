@@ -1,11 +1,17 @@
 <div class="chart-card">
-  <h3 class="chart-title">{{ title() }}</h3>
+  <h3>{{ title }}</h3>
   <div class="chart-container">
-    <canvas
-      baseChart
-      [data]="data()"
-      [options]="options()"
-      [type]="type()"
-    ></canvas>
+    @if (data) {
+      <canvas
+        baseChart
+        [data]="data"
+        [type]="type"
+        [options]="chartOptions">
+      </canvas>
+    } @else {
+      <div class="chart-loading">
+        <p>Carregando...</p>
+      </div>
+    }
   </div>
 </div>

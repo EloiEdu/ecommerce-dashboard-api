@@ -13,9 +13,7 @@ export class DashboardAdapterService {
     },
   };
 
-  /**
-   * Converte séries temporais mensais em ChartData para gráficos de linha.
-   */
+
   toLineChartData<T>(
     data: T[],
     dateKey: keyof T,
@@ -42,9 +40,7 @@ export class DashboardAdapterService {
     };
   }
 
-  /**
-   * Converte agregações para ChartData do tipo Barra.
-   */
+
   toBarChartData<T>(
     data: T[],
     labelKey: keyof T,
@@ -62,9 +58,6 @@ export class DashboardAdapterService {
     };
   }
 
-  /**
-   * Converte agregações para ChartData do tipo Doughnut (Rosca).
-   */
   toDoughnutChartData<T>(
     data: T[],
     labelKey: keyof T,
