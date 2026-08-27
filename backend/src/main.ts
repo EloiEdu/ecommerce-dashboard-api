@@ -10,7 +10,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:4200',
-      'https://ecommerce-dashboard-api-git-main-eloi-edu.vercel.app/',
+      'https://ecommerce-dashboard-api-git-main-eloi-edu.vercel.app',
+      'https://ecommerce-dashboard-api-eosin.vercel.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
