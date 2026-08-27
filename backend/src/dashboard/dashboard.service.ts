@@ -42,6 +42,7 @@ export class DashboardService {
       ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
       : Prisma.empty;
   }
+
   async getGmvByMonth(filters: DashboardFilterDto): Promise<GmvByMonth[]> {
     const where = this.buildDashboardDateFilter(filters);
 
@@ -281,7 +282,7 @@ export class DashboardService {
         SUM(oi."price") / COUNT(DISTINCT oi."orderId"),
         2
       )::DOUBLE PRECISION AS "averageTicket"
-      FROM "Order" o
+      FROM public."Order" o
 
       JOIN "OrderItem" oi
        ON oi."orderId" = o."orderId"
