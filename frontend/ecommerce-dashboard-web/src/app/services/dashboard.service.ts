@@ -18,13 +18,15 @@ import {
   GmvBySellerState,
   DashboardFilters,
 } from '../interfaces/dashboard.interfaces'
+
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:3000/dashboard';
+  private readonly apiUrl = `${environment.apiUrl}/dashboard`;
 
   private buildParams(filters: DashboardFilters): HttpParams {
     let params = new HttpParams();
