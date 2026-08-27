@@ -75,3 +75,6 @@ data/raw/
 .agents/
 .claude/
 .windsurf/
+
+*.sql
+backend/ecommerce_dashboard_data.sql
