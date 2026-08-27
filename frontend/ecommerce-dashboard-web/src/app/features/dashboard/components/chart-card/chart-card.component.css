@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chart-card {
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+
+  min-height: 0; 
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.chart-card h3 {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111;
+  flex-shrink: 0;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px; 
+  min-height: 300px;
+  max-height: 300px;
+  flex: 1;
+}
+
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-size: 13px;
+}
