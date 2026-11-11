@@ -24,6 +24,8 @@ model Customer {
   state            String
 
   orders Order[]
+
+  @@index([state])
 }
 
 model Order {
@@ -64,6 +66,7 @@ model OrderItem {
   @@unique([orderId, orderItemId])
   @@index([productId])
   @@index([sellerId])
+  @@index([orderId,productId])
 }
 
 model Product {
@@ -80,6 +83,8 @@ model Product {
   widthCm           Int?
 
   items OrderItem[]
+
+  @@index([categoryName])
 }
 
 model Seller {
@@ -90,6 +95,8 @@ model Seller {
   state         String
 
   items OrderItem[]
+
+  @@index([state])
 }
 
 model Payment {
