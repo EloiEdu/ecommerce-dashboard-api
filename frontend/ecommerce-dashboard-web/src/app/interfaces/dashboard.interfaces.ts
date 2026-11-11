@@ -73,3 +73,20 @@ export interface DashboardFilters {
   startDate?: string;
   endDate?: string;
 }
+
+export interface DashboardOverview {
+  summary: DashboardSummary;
+  gmvMonth: GmvByMonth[];
+  ordersMonth: OrdersByMonth[];
+  averageTicketMonth: AverageTicketByMonth[];
+  gmvCategory: GmvByCategory[];
+  ordersCategory: OrdersByCategory[];
+  averageTicketCategory: AverageTicketByCategory[];
+  gmvStatus: GmvByStatus[];
+  ordersStatus: OrdersByStatus[];
+  gmvState: GmvByState[];
+  ordersState: OrdersByState[];
+  averageTicketState: AverageTicketByState[];
+  itemsCategory: ItemsByCategory[];
+  gmvSellerState: GmvBySellerState[];
+}

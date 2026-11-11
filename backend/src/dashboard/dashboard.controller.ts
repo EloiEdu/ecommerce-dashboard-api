@@ -1,4 +1,5 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { DashboardService } from './dashboard.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
@@ -23,6 +24,71 @@ import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 @Controller('dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
+
+  // ... seus outros métodos existentes ...
+
+  @ApiOperation({
+    summary:
+      'Retorna todos os dados consolidados do dashboard em uma única chamada',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Consolidado de todas as métricas do e-commerce para carregamento rápido',
+  })
+  @Get('overview')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(300_000)
+  async getDashboardOverview(@Query() filters: DashboardFilterDto) {
+    const [
+      summary,
+      gmvMonth,
+      ordersMonth,
+      averageTicketMonth,
+      gmvCategory,
+      ordersCategory,
+      averageTicketCategory,
+      gmvStatus,
+      ordersStatus,
+      gmvState,
+      ordersState,
+      averageTicketState,
+      itemsCategory,
+      gmvSellerState,
+    ] = await Promise.all([
+      this.dashboardService.getDashboardSummary(filters),
+      this.dashboardService.getGmvByMonth(filters),
+      this.dashboardService.getOrdersByMonth(filters),
+      this.dashboardService.getAverageTicketByMonth(filters),
+      this.dashboardService.getGmvByCategory(filters),
+      this.dashboardService.getOrdersByCategory(filters),
+      this.dashboardService.getAverageTicketByCategory(filters),
+      this.dashboardService.getGmvByStatus(filters),
+      this.dashboardService.getOrdersByStatus(filters),
+      this.dashboardService.getGmvByState(filters),
+      this.dashboardService.getOrdersByState(filters),
+      this.dashboardService.getAverageTicketByState(filters),
+      this.dashboardService.getItemsByCategory(filters),
+      this.dashboardService.getGmvBySellerState(filters),
+    ]);
+
+    return {
+      summary,
+      gmvMonth,
+      ordersMonth,
+      averageTicketMonth,
+      gmvCategory,
+      ordersCategory,
+      averageTicketCategory,
+      gmvStatus,
+      ordersStatus,
+      gmvState,
+      ordersState,
+      averageTicketState,
+      itemsCategory,
+      gmvSellerState,
+    };
+  }
 
   @ApiOperation({
     summary: 'Retorna o GMV mensal',

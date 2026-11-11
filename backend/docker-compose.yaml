@@ -1,0 +1,35 @@
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  redis_data:

@@ -48,7 +48,7 @@ export class DashboardService {
 
     return this.prisma.$queryRaw<GmvByMonth[]>`
       SELECT
-      DATE_TRUNC('month', o."purchaseTimestamp") AS month,
+      (DATE_TRUNC('month', o."purchaseTimestamp") + INTERVAL '12 hours') AS month,
       SUM(oi."price")::DOUBLE PRECISION AS gmv
     FROM "Order" o
     JOIN "OrderItem" oi
@@ -66,7 +66,7 @@ export class DashboardService {
 
     return this.prisma.$queryRaw<OrdersByMonth[]>`
       SELECT
-      DATE_TRUNC('month', o."purchaseTimestamp") AS month,
+      (DATE_TRUNC('month', o."purchaseTimestamp") + INTERVAL '12 hours') AS month,
       COUNT(DISTINCT o."orderId")::INTEGER AS orders
       FROM "Order" o
       ${where}
@@ -82,7 +82,7 @@ export class DashboardService {
 
     return this.prisma.$queryRaw<AverageTicketByMonth[]>`
       SELECT
-      DATE_TRUNC('month', o."purchaseTimestamp") AS month,
+      (DATE_TRUNC('month', o."purchaseTimestamp") + INTERVAL '12 hours') AS month,
       ROUND(
         SUM(oi."price") / COUNT(DISTINCT o."orderId"),
         2

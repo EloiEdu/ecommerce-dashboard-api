@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   DashboardFilters,
@@ -35,6 +35,23 @@ export interface DashboardDataPayload {
   averageTicketByState: AverageTicketByState[];
   itemsByCategory: ItemsByCategory[];
   gmvBySellerState: GmvBySellerState[];
+}
+
+interface DashboardOverviewResponse {
+  summary: DashboardSummary;
+  gmvMonth: GmvByMonth[];
+  ordersMonth: OrdersByMonth[];
+  averageTicketMonth: AverageTicketByMonth[];
+  gmvCategory: GmvByCategory[];
+  ordersCategory: OrdersByCategory[];
+  averageTicketCategory: AverageTicketByCategory[];
+  gmvStatus: GmvByStatus[];
+  ordersStatus: OrdersByStatus[];
+  gmvState: GmvByState[];
+  ordersState: OrdersByState[];
+  averageTicketState: AverageTicketByState[];
+  itemsCategory: ItemsByCategory[];
+  gmvSellerState: GmvBySellerState[];
 }
 
 @Injectable({
@@ -140,23 +157,25 @@ export class DashboardService {
   }
 
   getDashboardData(filters: DashboardFilters): Observable<DashboardDataPayload> {
-    const options = { params: this.buildParams(filters) };
+    const params = this.buildParams(filters);
 
-    return forkJoin({
-      summary: this.http.get<DashboardSummary>(`${this.apiUrl}/resumo`, options),
-      gmvByMonth: this.http.get<GmvByMonth[]>(`${this.apiUrl}/gmv/mensal`, options),
-      gmvByCategory: this.http.get<GmvByCategory[]>(`${this.apiUrl}/gmv/categoria`, options),
-      ordersByStatus: this.http.get<OrdersByStatus[]>(`${this.apiUrl}/pedidos/status`, options),
-      ordersByMonth: this.http.get<OrdersByMonth[]>(`${this.apiUrl}/pedidos/mensal`, options),
-      averageTicketByMonth: this.http.get<AverageTicketByMonth[]>(`${this.apiUrl}/ticket-medio/mensal`, options),
-      ordersByCategory: this.http.get<OrdersByCategory[]>(`${this.apiUrl}/pedidos/categoria`, options),
-      averageTicketByCategory: this.http.get<AverageTicketByCategory[]>(`${this.apiUrl}/ticket-medio/categoria`, options),
-      gmvByStatus: this.http.get<GmvByStatus[]>(`${this.apiUrl}/gmv/status`, options),
-      gmvByState: this.http.get<GmvByState[]>(`${this.apiUrl}/gmv/estado`, options),
-      ordersByState: this.http.get<OrdersByState[]>(`${this.apiUrl}/pedidos/estado`, options),
-      averageTicketByState: this.http.get<AverageTicketByState[]>(`${this.apiUrl}/ticket-medio/estado`, options),
-      itemsByCategory: this.http.get<ItemsByCategory[]>(`${this.apiUrl}/itens/categoria`, options),
-      gmvBySellerState: this.http.get<GmvBySellerState[]>(`${this.apiUrl}/gmv/estado-vendedor`, options),
-    });
+    return this.http.get<DashboardOverviewResponse>(`${this.apiUrl}/overview`, { params }).pipe(
+      map((response) => ({
+        summary: response.summary,
+        gmvByMonth: response.gmvMonth ?? [],
+        ordersByMonth: response.ordersMonth ?? [],
+        averageTicketByMonth: response.averageTicketMonth ?? [],
+        gmvByCategory: response.gmvCategory ?? [],
+        ordersByCategory: response.ordersCategory ?? [],
+        averageTicketByCategory: response.averageTicketCategory ?? [],
+        gmvByStatus: response.gmvStatus ?? [],
+        ordersByStatus: response.ordersStatus ?? [],
+        gmvByState: response.gmvState ?? [],
+        ordersByState: response.ordersState ?? [],
+        averageTicketByState: response.averageTicketState ?? [],
+        itemsByCategory: response.itemsCategory ?? [],
+        gmvBySellerState: response.gmvSellerState ?? [],
+      }))
+    );
   }
 }
